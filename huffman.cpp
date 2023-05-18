@@ -49,10 +49,86 @@ void encode(node& a)
 	}
 }
 
+void huffmandecoder(string& s, multimap<int, char> h)
+{
+	int n = h.size();
+	node* t = new node[2 * n - 1];
+	auto mnp = h.begin();
+	for (int i = 0; i < n; i++)
+	{
+
+		if (mnp != h.end())
+		{
+			t[i].fre = mnp->first;
+			t[i].name = mnp->second;
+			mnp++;
+		}
+
+	}
+
+	multimap<int, node*> bt;
+	typedef pair <int, node*> btree_pair;
+	for (int i = 0; i < n; i++)
+	{
+		bt.insert(btree_pair(t[i].fre, &t[i]));
+	}
+
+	for (int i = 0; i < n - 1; i++)
+	{
+		multimap<int, node*>::iterator bst;
+		bst = bt.begin();
+		if (bst != bt.end())
+		{
+
+
+			node* x = (bst->second);
+			bt.erase(bst);
+			advance(bst, 1);
+			node* y = (bst->second);
+			bt.erase(bst);
+			t[i + n] = add(*x, *y, t[i + n]);
+			bt.insert(btree_pair(t[i + n].fre, &t[i + n]));
+
+
+		}
+
+	}
+
+
+
+	for (int i = 2 * n - 2; i > -1; i--)
+	{
+		encode(t[i]);
+	}
+	
+		
+			for (int i1 = 0; i1 < s.size();i1++)
+			{
+				for (int i = n-1; i >-1; i--)
+				{
+					
+						if (s.substr(i1, t[i].code.length()) == t[i].code)
+						{
+							string decode;
+							decode.assign(1, t[i].name);
+							s.replace(i1, t[i].code.length(), decode);
+							break;
+						}
+					
+				}
+			}
+		
+	
+	ofstream fileout;
+	fileout.open("fileout.txt");
+	fileout << s;
+
+}
 
 
 int main()
 {
+	string s1="";
 	ifstream file;
 	file.open("file.txt");
 	string s;
@@ -170,14 +246,19 @@ int main()
 			if (s[i] == t[p].name)
 			{
 				fileout1 << t[p].code;
+				s1 = s1 + t[p].code;
 			}
 		}
 	}
-	/*for (int i = 0; i <2 * n - 1; i++)
+	/*for (int i = 0; i <n; i++)
 	{
 		cout << t[i].code << '\n';
-	}*/
-	fileout1.close();
+	}
+	fileout1.close();*/
+
+	
+	huffmandecoder(s1, h);
+
 
 
 
