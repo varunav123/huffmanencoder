@@ -4,21 +4,21 @@
 #include<map>
 #include<string>
 #include<unordered_set>
-#include<vector>
-using namespace std;
 
-struct node 
+using namespace std;
+struct node
 {
 	char name;
 	string code;
-	node* parent=NULL;
-	node* left=NULL;
-	node* right=NULL;
+	node* parent = NULL;
+	node* left = NULL;
+	node* right = NULL;
 	string dir;
 	int fre;
 };
 
-node add(node& a, node& b,node& c)
+
+node add(node& a, node& b, node& c)
 {
 	c.left = &a;
 	a.dir = "0";
@@ -27,7 +27,7 @@ node add(node& a, node& b,node& c)
 	a.parent = &c;
 	b.parent = &c;
 	c.fre = a.fre + b.fre;
-	c.name = a.name + b.name; 
+	c.name = a.name + b.name;
 	return c;
 }
 void encode(node& a)
@@ -48,9 +48,24 @@ void encode(node& a)
 		a.code = a.parent->code + a.dir;
 	}
 }
+node* traversal(char x, node* y)
+{
+
+	if (x == '0')
+	{
+		return y->left;
+	}
+	else if (x == '1')
+	{
+		return y->right;
+	}
+	return NULL;
+}
 
 void huffmandecoder(string& s, multimap<int, char> h)
 {
+	ofstream fileout;
+	fileout.open("fileout.txt");
 	int n = h.size();
 	node* t = new node[2 * n - 1];
 	auto mnp = h.begin();
@@ -100,35 +115,34 @@ void huffmandecoder(string& s, multimap<int, char> h)
 	{
 		encode(t[i]);
 	}
-	
-		
-			for (int i1 = 0; i1 < s.size();i1++)
+	for (int i = 0; i < s.size()+1; )
+	{
+		node* x = traversal(s[i], &t[2 * n - 2]);
+		int j = 1;
+		for (; i + j < s.size()+1; j++)
+		{	
+			if (x->left == NULL && x->right == NULL)
 			{
-				for (int i = n-1; i >-1; i--)
-				{
-					
-						if (s.substr(i1, t[i].code.length()) == t[i].code)
-						{
-							string decode;
-							decode.assign(1, t[i].name);
-							s.replace(i1, t[i].code.length(), decode);
-							break;
-						}
-					
-				}
+				string decode;
+				decode.assign(1, x->name);
+				fileout << decode;
+				break;
 			}
-		
-	
-	ofstream fileout;
-	fileout.open("fileout.txt");
-	fileout << s;
+			
+			x = traversal(s[i + j], x);
+		}
+		i = i + j ;
+	}
 
+
+
+	fileout.close();
 }
 
 
 int main()
 {
-	string s1="";
+	string s1 = "";
 	ifstream file;
 	file.open("file.txt");
 	string s;
@@ -139,22 +153,22 @@ int main()
 	ofstream fileout1;
 	fileout1.open("fileout1.txt");
 	ofstream fileout2;
-	fileout2.open("fileout2.txt");	
+	fileout2.open("fileout2.txt");
 	unordered_set<char> c;
-	for (int i = 0; i < s.size() ; i++)
+	for (int i = 0; i < s.size(); i++)
 	{
 		c.insert(s[i]);
 	}
 	int n = c.size();
 	/*cout << n << '\n';*/
-	int* f=new int[n];
+	int* f = new int[n];
 	int k = 0;
 	unordered_set<char>::iterator itr;
 
 	for (itr = c.begin(); itr != c.end(); itr++)
-	{	
+	{
 		int j = 0;
-		for (int i = 0; i < s.size() ; i++)
+		for (int i = 0; i < s.size(); i++)
 		{
 			if (*itr == s[i])
 			{
@@ -164,15 +178,15 @@ int main()
 		f[k] = j;
 		k++;
 	}
-	
-	
+
+
 	multimap<int, char> h;
 	unordered_set<char>::iterator itr2;
 	typedef pair <int, char> diff_pair;
 	int l = 0;
 	for (itr2 = c.begin(); itr2 != c.end(); itr2++)
 	{
-		
+
 		h.insert(diff_pair(f[l], *itr2));
 		l++;
 	}
@@ -190,52 +204,52 @@ int main()
 
 	}
 	fileout2.close();
-	
+
 	node* t = new node[2 * n - 1];
 	auto mnp = h.begin();
 	for (int i = 0; i < n; i++)
 	{
-		
+
 		if (mnp != h.end())
 		{
 			t[i].fre = mnp->first;
 			t[i].name = mnp->second;
 			mnp++;
 		}
-		
+
 	}
 
 	multimap<int, node*> bt;
 	typedef pair <int, node*> btree_pair;
-	for (int i=0; i<n; i++)
+	for (int i = 0; i < n; i++)
 	{
-		bt.insert(btree_pair(t[i].fre,&t[i]));
+		bt.insert(btree_pair(t[i].fre, &t[i]));
 	}
-	
+
 	for (int i = 0; i < n - 1; i++)
 	{
-		multimap<int,node*>::iterator bst;
+		multimap<int, node*>::iterator bst;
 		bst = bt.begin();
 		if (bst != bt.end())
 		{
-			
-				
-				node* x = (bst->second);
-				bt.erase(bst);
-				advance(bst, 1);
-				node* y = (bst->second);
-				bt.erase(bst);
-				t[i+n] = add(*x,*y,t[i+n]);
-				bt.insert(btree_pair(t[i+n].fre, &t[i + n]));
-			
-			
+
+
+			node* x = (bst->second);
+			bt.erase(bst);
+			advance(bst, 1);
+			node* y = (bst->second);
+			bt.erase(bst);
+			t[i + n] = add(*x, *y, t[i + n]);
+			bt.insert(btree_pair(t[i + n].fre, &t[i + n]));
+
+
 		}
 
 	}
 
 
 
-	for (int i = 2*n-2; i >-1; i--)
+	for (int i = 2 * n - 2; i > -1; i--)
 	{
 		encode(t[i]);
 	}
@@ -245,21 +259,17 @@ int main()
 		{
 			if (s[i] == t[p].name)
 			{
-				fileout1 << t[p].code;
 				s1 = s1 + t[p].code;
+				break;
 			}
 		}
 	}
-	/*for (int i = 0; i <n; i++)
+	for (int i = 0; i <n; i++)
 	{
 		cout << t[i].code << '\n';
 	}
-	fileout1.close();*/
-
 	
+	fileout1 << s1;
+	fileout1.close();
 	huffmandecoder(s1, h);
-
-
-
-
 }
